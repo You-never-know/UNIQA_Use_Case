@@ -1,0 +1,178 @@
+﻿# FakeStoreAPI Products Pipeline
+
+## Overview
+
+This project fetches product data from FakeStoreAPI, stores it as a structured CSV dataset, and performs category-level analytics.
+
+The solution consists of two scripts:
+
+* `fetch_products.py` – fetches products from the API and writes them to a CSV dataset.
+* `analyze_products.py` – reads the CSV dataset and produces analytics and aggregations.
+
+---
+
+## Design Notes
+
+The assignment requested use of the **single-product endpoint** (`GET /products/{id}`).
+
+Instead of calling the bulk `GET /products` endpoint and then downloading every product again individually, this implementation performs product discovery directly through the single-product endpoint. Product IDs are probed sequentially until a configurable number of consecutive empty batches is encountered.
+
+Benefits:
+
+* Avoids downloading product data twice.
+* Uses only the required single-product endpoint.
+* Supports interrupted runs via append mode.
+* Streams results to disk incrementally rather than keeping everything in memory.
+
+Additional features:
+
+* Async fetching with `aiohttp`
+* Request retry logic with exponential backoff
+* Pydantic schema validation
+* Resume support through append mode
+* Automated test suite
+
+---
+
+## Requirements
+
+* Python 3.11+ (tested with Python 3.14)
+* Internet connection
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Project Structure
+
+```text
+.
+├── fetch_products.py
+├── analyze_products.py
+├── models.py
+├── products_processed.csv
+├── requirements.txt
+├── README.md
+└── tests/
+```
+
+---
+
+## Fetch Products
+
+Generate the dataset:
+
+```bash
+python fetch_products.py
+```
+
+Default output:
+
+```text
+products_processed.csv
+```
+
+### Overwrite Mode
+
+Replace the existing dataset:
+
+```bash
+python fetch_products.py --mode overwrite
+```
+
+### Append Mode
+
+Resume a previously interrupted run:
+
+```bash
+python fetch_products.py --mode append
+```
+
+### Optional Arguments
+
+```bash
+python fetch_products.py --help
+```
+
+Available configuration includes:
+
+* `--max-concurrency`
+* `--max-retries`
+* `--retry-backoff`
+* `--chunk-size`
+* `--start-id`
+* `--stop-after-empty-batches`
+* `--max-id`
+
+---
+
+## Analyze Dataset
+
+Run analytics against the generated CSV:
+
+```bash
+python analyze_products.py
+```
+
+```bash
+python analyze_products.py --input products_processed.csv
+```
+
+Example output includes:
+
+* Number of products per category
+* Average price per category
+* Average rating per category
+* Minimum and maximum price per category
+* Total inventory value per category
+* Highest-rated and lowest-rated products per category
+* Highest-rated and lowest-rated categories
+
+---
+
+## Running Tests
+
+Run all tests:
+
+```bash
+pytest tests -v
+```
+
+Run tests with coverage:
+
+```bash
+pytest --cov=. --cov-report=term-missing
+```
+
+---
+
+## Output Dataset
+
+The generated dataset contains the following columns:
+
+| Column       | Description         |
+| ------------ | ------------------- |
+| id           | Product identifier  |
+| title        | Product title       |
+| price        | Product price       |
+| description  | Product description |
+| category     | Product category    |
+| image        | Product image URL   |
+| rating_rate  | Product rating      |
+| rating_count | Number of ratings   |
+
+---
+
+## Assumptions
+
+* Products are identified by numeric IDs.
+* Missing products may return either:
+
+  * HTTP 404
+  * HTTP 200 with a `null` body
+
+Both cases are treated as "product does not exist".

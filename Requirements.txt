@@ -1,0 +1,6 @@
+﻿aiohttp>=3.9
+pandas>=2.0
+pydantic>=2.0
+tabulate>=0.9
+pytest>=7.4
+pytest-asyncio>=0.21
