@@ -1,60 +1,50 @@
 ﻿# FakeStoreAPI Products Pipeline
 
-## Overview
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+![Tests](https://img.shields.io/badge/Tests-pytest-green)
+![Async](https://img.shields.io/badge/Async-aiohttp-purple)
 
-This project fetches product data from FakeStoreAPI, stores it as a structured CSV dataset, and performs category-level analytics.
+A high-performance data pipeline that fetches product data from the FakeStoreAPI, stores it as a structured CSV dataset, and performs category-level analytics.
 
-The solution consists of two scripts:
-
-* `fetch_products.py` – fetches products from the API and writes them to a CSV dataset.
-* `analyze_products.py` – reads the CSV dataset and produces analytics and aggregations.
-
----
-
-## Design Notes
-
-The assignment requested use of the **single-product endpoint** (`GET /products/{id}`).
-
-Instead of calling the bulk `GET /products` endpoint and then downloading every product again individually, this implementation performs product discovery directly through the single-product endpoint. Product IDs are probed sequentially until a configurable number of consecutive empty batches is encountered.
-
-Benefits:
-
-* Avoids downloading product data twice.
-* Uses only the required single-product endpoint.
-* Supports interrupted runs via append mode.
-* Streams results to disk incrementally rather than keeping everything in memory.
-
-Additional features:
-
-* Async fetching with `aiohttp`
-* Request retry logic with exponential backoff
-* Pydantic schema validation
-* Resume support through append mode
-* Automated test suite
+The project is designed with **scalability, resilience, and API efficiency** in mind, using asynchronous requests, retry logic, and incremental streaming.
 
 ---
 
-## Requirements
+## 📦 Features
 
-* Python 3.11+ (tested with Python 3.14)
-* Internet connection
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
+- 🚀 Async product fetching using `aiohttp`
+- 🔁 Retry mechanism with exponential backoff
+- 📊 Category-level analytics engine
+- 🧩 Pydantic-based data validation
+- 💾 Streaming CSV writes (memory efficient)
+- 🔄 Resume support (append mode)
+- 🧪 Automated test suite with `pytest`
 
 ---
 
-## Project Structure
+## 🏗 Architecture Overview
+
+### Data Ingestion Layer
+- Fetches product data via `GET /products/{id}`
+- Sequential ID discovery (no bulk endpoint used)
+- Handles missing products gracefully (404 or null responses)
+- Streams results incrementally to disk
+
+### Analytics Layer
+- Reads structured CSV dataset
+- Computes category-level aggregations
+- Generates statistical insights
+
+---
+
+## 📁 Project Structure
 
 ```text
 .
-├── fetch_products.py
-├── analyze_products.py
-├── models.py
-├── products_processed.csv
+├── fetch_products.py        # Async data ingestion pipeline
+├── analyze_products.py      # Analytics engine
+├── models.py                # Pydantic data models
+├── products_processed.csv   # Output dataset
 ├── requirements.txt
 ├── README.md
 └── tests/
@@ -62,87 +52,96 @@ pip install -r requirements.txt
 
 ---
 
-## Fetch Products
+## ⚙️ Installation
 
-Generate the dataset:
+### Requirements
+- Python 3.11+
+- Internet connection
+
+### Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🚀 Usage
+
+### 1. Fetch Products
 
 ```bash
 python fetch_products.py
 ```
 
-Default output:
+Output:
 
 ```text
 products_processed.csv
 ```
 
-### Overwrite Mode
-
-Replace the existing dataset:
+#### Overwrite mode
 
 ```bash
 python fetch_products.py --mode overwrite
 ```
 
-### Append Mode
-
-Resume a previously interrupted run:
+#### Append mode (resume run)
 
 ```bash
 python fetch_products.py --mode append
 ```
 
-### Optional Arguments
+#### Help / options
 
 ```bash
 python fetch_products.py --help
 ```
 
-Available configuration includes:
-
-* `--max-concurrency`
-* `--max-retries`
-* `--retry-backoff`
-* `--chunk-size`
-* `--start-id`
-* `--stop-after-empty-batches`
-* `--max-id`
+Available options:
+- `--max-concurrency`
+- `--max-retries`
+- `--retry-backoff`
+- `--chunk-size`
+- `--start-id`
+- `--stop-after-empty-batches`
+- `--max-id`
 
 ---
 
-## Analyze Dataset
-
-Run analytics against the generated CSV:
+### 2. Run Analytics
 
 ```bash
 python analyze_products.py
 ```
 
+Or:
+
 ```bash
 python analyze_products.py --input products_processed.csv
 ```
 
-Example output includes:
+### 📊 Analytics Output
 
-* Number of products per category
-* Average price per category
-* Average rating per category
-* Minimum and maximum price per category
-* Total inventory value per category
-* Highest-rated and lowest-rated products per category
-* Highest-rated and lowest-rated categories
+- Products per category
+- Average price per category
+- Average rating per category
+- Min/max price per category
+- Total inventory value per category
+- Highest/lowest rated products per category
+- Best/worst performing categories
 
 ---
 
-## Running Tests
+## 🧪 Testing
 
-Run all tests:
+Run tests:
 
 ```bash
 pytest tests -v
 ```
 
-Run tests with coverage:
+Run with coverage:
 
 ```bash
 pytest --cov=. --cov-report=term-missing
@@ -150,29 +149,82 @@ pytest --cov=. --cov-report=term-missing
 
 ---
 
-## Output Dataset
+## 📊 Dataset Schema
 
-The generated dataset contains the following columns:
-
-| Column       | Description         |
-| ------------ | ------------------- |
-| id           | Product identifier  |
-| title        | Product title       |
-| price        | Product price       |
-| description  | Product description |
-| category     | Product category    |
-| image        | Product image URL   |
-| rating_rate  | Product rating      |
-| rating_count | Number of ratings   |
+| Column        | Description            |
+|---------------|------------------------|
+| id            | Product identifier     |
+| title         | Product title          |
+| price         | Product price          |
+| description   | Product description    |
+| category      | Product category       |
+| image         | Product image URL      |
+| rating_rate   | Product rating         |
+| rating_count  | Number of ratings      |
 
 ---
 
-## Assumptions
+## 🧠 Design Decisions
 
-* Products are identified by numeric IDs.
-* Missing products may return either:
+### Why use the single-product endpoint?
 
-  * HTTP 404
-  * HTTP 200 with a `null` body
+This project intentionally uses:
 
-Both cases are treated as "product does not exist".
+```
+GET /products/{id}
+```
+
+instead of the bulk endpoint.
+
+### Benefits:
+- Avoids redundant full dataset downloads
+- Streams results incrementally
+- Improves fault tolerance
+- Enables resume support (append mode)
+- Provides fine-grained retry control
+
+---
+
+## ⚠️ Assumptions
+
+- Product IDs are numeric and sequential
+- Missing products may return:
+  - HTTP 404
+  - HTTP 200 with `null` body
+- Both are treated as non-existent products
+
+---
+
+## 📌 Roadmap
+
+- [ ] Export dataset to Parquet
+- [ ] Add database support (PostgreSQL / SQLite)
+- [ ] Dockerize pipeline
+- [ ] Add FastAPI service layer
+- [ ] Add Streamlit dashboard
+- [ ] Parallel category analytics
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit changes:
+   ```bash
+   git commit -m "Add feature"
+   ```
+4. Push branch:
+   ```bash
+   git push origin feature-name
+   ```
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
