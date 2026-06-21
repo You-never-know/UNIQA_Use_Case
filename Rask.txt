@@ -1,0 +1,35 @@
+﻿Objective
+
+Build a small Python script:
+
+    Data source:
+
+Use the following API: https://fakestoreapi.com/docs#tag/Products
+
+    Fetch data from API:
+        Fetches all products from the API (using Get a single product method).
+    Data processing.
+        Transform raw API Data into a structured dataset with all attributes as a column.
+    Saves results into a CSV file.
+        The storage layer should support both overwrite and append mode (in case the process was interrupted).
+    Write a second script to perform analytics and aggregations based on the CSV dataset:
+        Number of products per category.
+        Average price and rating per category.
+        Output results in a readable format - console is enough.
+    You are welcome to extend the solution with additional features if you see areas for improvement. Please keep the core requirements intact.
+
+
+
+Requirements
+
+    Python 3.x
+
+
+
+Deliverables
+
+    Source code
+    README.md with instructions to run
+    Requiremtents.txt (if needed)
+    General products_processed.csv file
+
