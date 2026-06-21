@@ -195,17 +195,6 @@ instead of the bulk endpoint.
 
 ---
 
-## 📌 Roadmap
-
-- [ ] Export dataset to Parquet
-- [ ] Add database support (PostgreSQL / SQLite)
-- [ ] Dockerize pipeline
-- [ ] Add FastAPI service layer
-- [ ] Add Streamlit dashboard
-- [ ] Parallel category analytics
-
----
-
 ## 🤝 Contributing
 
 1. Fork the repository
