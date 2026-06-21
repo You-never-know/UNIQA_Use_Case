@@ -61,7 +61,7 @@ The project is designed with **scalability, resilience, and API efficiency** in 
 ### Setup
 
 ```bash
-pip install -r requirements.txt
+pip install -r Requirements.txt
 ```
 
 ---
@@ -216,4 +216,4 @@ instead of the bulk endpoint.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the GNU General Public License v3.0.
