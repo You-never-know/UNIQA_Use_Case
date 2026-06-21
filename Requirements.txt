@@ -4,3 +4,4 @@ pydantic>=2.0
 tabulate>=0.9
 pytest>=7.4
 pytest-asyncio>=0.21
+pytest-cov>=7.0

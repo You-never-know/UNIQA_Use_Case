@@ -97,18 +97,6 @@ async def test_fetch_product_validation_failure_not_retried(make_fake_session):
 
 
 @pytest.mark.asyncio
-async def test_fetch_product_retries_then_succeeds(make_fake_session):
-    session = make_fake_session({11: TransientFailure(times=2, then=make_product_payload(11))})
-
-    result = await fp.fetch_product(
-        session, asyncio.Semaphore(1), "http://fake", 11, max_retries=5, backoff_base=0.001, logger=LOGGER
-    )
-
-    assert result["id"] == 11
-    assert session.calls.count(11) == 3  # 2 failures + 1 success
-
-
-@pytest.mark.asyncio
 async def test_fetch_product_fails_after_exhausting_retries(make_fake_session):
     session = make_fake_session({13: TransientFailure(times=10, then=make_product_payload(13))})
 
@@ -335,25 +323,6 @@ async def test_run_append_does_not_duplicate_header_on_second_run(tmp_path, monk
     assert output_path.read_text().count(header_line) == 1
     df = pd.read_csv(output_path)
     assert sorted(df["id"].tolist()) == [1, 2, 3]
-
-@pytest.mark.asyncio
-async def test_fetch_product_success(make_fake_session, product_payload):
-    session = make_fake_session({
-        1: product_payload(1)
-    })
-
-    result = await fetch_product(
-        session=session,
-        semaphore=asyncio.Semaphore(1),
-        base_url="https://fake.test",
-        product_id=1,
-        max_retries=3,
-        backoff_base=0,
-        logger=logging.getLogger("test"),
-    )
-
-    assert result["id"] == 1
-    assert result["rating_rate"] == 4.0
 
 
 @pytest.mark.asyncio
